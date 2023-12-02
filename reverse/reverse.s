@@ -32,16 +32,17 @@ BUF equ $0200
 
 main
     jsr HOME
+
+    ldy #$0a
+main_loop
     jsr hello3
-    jsr hello3
-    jsr hello3
-    jsr hello3
-    jsr hello3
-    ;brk
+    dey
+    bne main_loop
 
 halt
     jmp halt
 
+; Clobbers a and x.
 hello3
     ldx #$00
 hello3_loop
