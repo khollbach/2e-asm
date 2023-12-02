@@ -2,12 +2,19 @@ Byte SWEET16 article Qs:
 [ ] "store pop" instr ?
 [ ] CPR example vs BP example (see also, BS example, for ref)
 
+SWEET16 exercises:
+* re-write
+    * clear screen
+    * ascii table
+    * draw square
+    * hgr programs as well, if that seems useful
+
 ---
 
 Program ideas:
-* clear screen
-* ascii table
-* hello world
+[x] clear screen
+[x] ascii table
+[x] hello world
 * echo reverse
 * paint screen solid color (HGR)
     * toggle on keypress
