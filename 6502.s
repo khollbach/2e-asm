@@ -32,25 +32,31 @@ ascii_table
 
     lda #$00
 top_half
+    ldy #$00
 row
     sta ($60),y
     clc
     adc #$01
+
     iny
     cpy $62
     bne row
 
-    ; TODO: add $80 to $60,$61
+    ; add $80 to $60,$61
     pha
     lda #$80
     clc
     adc $60
-    adc $61
-    ; ??
+    sta $60
 
-    ; TODO: compare $60,$61 to $0800
-    ; (or at least High byte to $8)
-    b?? top_half
+    lda #$00
+    adc $61
+    sta $61
+
+    lda #05
+    cmp $61
+    pla
+    bne top_half
 
     rts
 

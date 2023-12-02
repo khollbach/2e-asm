@@ -1,4 +1,4 @@
-name := hello-6502
+name := 6502
 start_addr := 2000
 
 default: dsk
