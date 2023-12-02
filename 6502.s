@@ -6,17 +6,18 @@
 main
     jsr clear_screen
     jsr ascii_table
+    ;jsr draw_square
+    ;brk
+
 halt
     jmp halt
-    ;jsr draw_square
-    brk
 
 draw_square
-    lda #$bf
-    sta $600
-    sta $601
-    sta $680
-    sta $681
+    lda #$ff
+    sta $620
+    sta $621
+    sta $6a0
+    sta $6a1
     rts
 
 ascii_table
@@ -31,7 +32,28 @@ ascii_table
     sta $62
 
     lda #$00
-top_half
+    jsr half
+
+    ;; set up $60 to point to $0428
+    pha
+    lda #$28
+    sta $60
+    lda #$04
+    sta $61
+    pla
+
+    jsr half
+
+    rts
+
+; draw the (top, or bottom) half of an ascii table
+; helper for `ascii_table`
+; inputs:
+;   $60,$61 (initial offset)
+;   $62 (row loop limit)
+;   a (current ascii value)
+; outputs: a, scrambles y
+half
     ldy #$00
 row
     sta ($60),y
@@ -48,15 +70,14 @@ row
     clc
     adc $60
     sta $60
-
     lda #$00
     adc $61
     sta $61
-
-    lda #05
-    cmp $61
     pla
-    bne top_half
+
+    ldy #$08
+    cpy $61
+    bne half
 
     rts
 

@@ -2,3 +2,18 @@ Byte SWEET16 article Qs:
 [ ] "store pop" instr ?
 [ ] CPR example vs BP example (see also, BS example, for ref)
 
+---
+
+Program ideas:
+* clear screen
+* ascii table
+* hello world
+* echo reverse
+* paint screen solid color (HGR)
+    * toggle on keypress
+* checker board pattern in HGR (8x8 or whole screen)
+* draw rc logo (HGR)
+* tile the screen with it
+* colors ??
+* 2048
+
