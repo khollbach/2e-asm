@@ -24,6 +24,7 @@ SETNORM equ $fe84
 ; Relevant memory locations
 CH equ $24
 CV equ $25
+PROMPT equ $33
 RNDL equ $4e
 RNDH equ $4f
 BUF equ $0200
@@ -32,12 +33,30 @@ BUF equ $0200
 
 main
     jsr HOME
+    lda #">"
+    sta PROMPT
 
-    ldy #$0a
 main_loop
-    jsr hello3
-    dey
-    bne main_loop
+    jsr GETLN
+
+    ; edge-case: length 0
+    lda #$00
+    sta $60
+    cpx $60
+    beq after_print_loop
+
+    ldy #$00
+print_loop
+    lda BUF,y
+    jsr COUT
+    iny
+    stx $60
+    cpy $60
+    bne print_loop
+
+after_print_loop
+    jsr CROUT
+    jmp main_loop
 
 halt
     jmp halt
