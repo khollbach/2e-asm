@@ -36,48 +36,45 @@ main
 main_loop
     jsr RDKEY
     jsr bell
+
+;     ; expecting ~10 seconds pause
+;     ldy #100
+; wait_loop
+;     jsr bell
+;     dey
+;     bne wait_loop
+
     jmp main_loop
 
 halt
     jmp halt
 
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+; todo: debug bell code...
+; see also: https://lateblt.tripod.com/appl2snd.htm
+; * they have some good ideas about using a simple
+;   timing loop, before we get fancy with `jsr WAIT`.
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+; 0.1 second "bell"
+; clobbers a, x
 bell
-    ; 200 iterations.
     ; 200 * 500 us = 100 ms = 0.1 s
-    ;ldx #200
-    ldx #1 ; TODO
+    ldx #200
 bell_loop
     ;bit SPKR ; "click" (toggle) speaker once
-    ; TODO
-    jsr wait_500_us
+    jsr wait_535_us
     dex
-    bpl bell_loop
+    bne bell_loop
     rts
 
-; clobbers: a, $60, $61
-wait_500_us
-    ; $61a7 = 24,999 -- so 25,000 iterations
-    lda #$a7
-    sta $60
-    lda #$61
-    sta $61
-wait_500_us_loop
-    ; Wait for 20 ns.
-    ; 20 ns * 25,000 = 500 us
-    lda #$00
-    ;jsr WAIT
-    ; TODO
-
-    ; Subtract one.
-    lda $60
-    sec
-    sbc #$01
-    sta $60
-    lda $61
-    sbc #$00
-    sta $61
-
-    bpl wait_500_us_loop
+; clobbers: a
+wait_535_us
+    ; The formula is:
+    ; delay_us := (1/2)*(26 + 27a + 5a^2)
+    ; If we set a=12, we get 535 us delay.
+    lda #12
+    jsr WAIT
     rts
 
     brk
