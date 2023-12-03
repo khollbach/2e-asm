@@ -54,6 +54,10 @@ halt
 ; see also: https://lateblt.tripod.com/appl2snd.htm
 ; * they have some good ideas about using a simple
 ;   timing loop, before we get fancy with `jsr WAIT`.
+;
+; misc todo:
+; * what does the TRM mean by "low freqs less than ~400Hz ..."
+;   on page 37 ?  (experiment, and find out!)
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 ; 0.1 second "bell"
