@@ -12,18 +12,25 @@ SWEET16 exercises:
 ---
 
 Program ideas:
+
 [x] clear screen
 [x] ascii table
 [x] hello world
 [x] echo reverse
-[ ] "bell"
-    * produce a 1000 Hz tone for 0.1 second
-* PRHEX and PRBYTE (and possibly PRNTAX)
+
+[>] bell
+
+[ ] PRHEX
+[ ] PRBYTE
+[ ] PRNTAX
+
 * paint screen solid color (HGR)
     * toggle on keypress
 * checker board pattern in HGR (8x8 or whole screen)
+
 * draw rc logo (HGR)
 * tile the screen with it
 * colors ??
+
 * 2048
 
