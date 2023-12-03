@@ -34,12 +34,20 @@ SPKR equ $c030 ; read to toggle
 main
     jsr HOME
     lda #$13
-    jsr prbyte
-    lda #$37
-    jsr prbyte
+    ldx #$37
+    jsr prntax
 
 halt
     jmp halt
+
+; inputs: a, x
+; clobbers: $60, ???
+prntax
+    stx $60
+    jsr prbyte
+    lda $60
+    jsr prbyte
+    rts
 
 ; inputs: a
 ; clobbers: a, x
