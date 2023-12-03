@@ -21,10 +21,10 @@ Program ideas:
 [>] bell
 
 [x] PRHEX
-[ ] PRBYTE
-[ ] PRNTAX
+[x] PRBYTE
+[x] PRNTAX
 
-* paint screen solid color (HGR)
+[ ] paint screen solid color (HGR)
     * toggle on keypress
 * checker board pattern in HGR (8x8 or whole screen)
 
