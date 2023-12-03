@@ -35,38 +35,43 @@ main
     jsr HOME
     lda #">"
     sta PROMPT
-
 main_loop
     jsr GETLN
-
-    ldy #$00
-    stx $60
-print_loop
-    cpy $60
-    beq print_loop_end
-
-    lda BUF,y
-    jsr COUT
-
-    iny
-    jmp print_loop
-print_loop_end
-
-    jsr CROUT
+    jsr echo_reverse
     jmp main_loop
 
 halt
     jmp halt
 
-; Clobbers a and x.
-hello3
-    ldx #$00
-hello3_loop
-    lda hello_world,x
+; inputs: x, BUF
+; clobbers: a
+echo_reverse
+    dex
+    cpx FF
+    beq echo_reverse_end
+    lda BUF,x
     jsr COUT
-    inx
-    cpx #hello_world_end-hello_world
-    bne hello3_loop
+    jmp echo_reverse
+echo_reverse_end
+    jsr CROUT
+    rts
+
+; inputs: x, BUF
+; clobbers: a, y
+echo
+    ldy #$00
+    stx $60
+echo_loop
+    cpy $60
+    beq echo_loop_end
+
+    lda BUF,y
+    jsr COUT
+
+    iny
+    jmp echo_loop
+echo_loop_end
+
     jsr CROUT
     rts
 
@@ -74,9 +79,10 @@ hello3_loop
     brk
     brk
 
-hello_world
-    asc "Hello, world!"
-hello_world_end
+ZERO
+    hex 00
+FF
+    hex ff
 
     brk
     brk
