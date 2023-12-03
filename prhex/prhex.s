@@ -33,16 +33,10 @@ SPKR equ $c030 ; read to toggle
 
 main
     jsr HOME
-    lda #$b
-    jsr prhex
-    lda #$a
-    jsr prhex
-    lda #$5
-    jsr prhex
-    lda #$1
-    jsr prhex
-    lda #$c
-    jsr prhex
+    lda #$13
+    jsr prbyte
+    lda #$37
+    jsr prbyte
 
 halt
     jmp halt
@@ -54,6 +48,19 @@ prhex
     tax
     lda hex_digits,x
     jsr COUT
+    rts
+
+; inputs: a
+; clobbers: a, x
+prbyte
+    pha
+    ror
+    ror
+    ror
+    ror
+    jsr prhex
+    pla
+    jsr prhex
     rts
 
     brk
