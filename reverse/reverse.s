@@ -39,22 +39,19 @@ main
 main_loop
     jsr GETLN
 
-    ; edge-case: length 0
-    lda #$00
-    sta $60
-    cpx $60
-    beq after_print_loop
-
     ldy #$00
+    stx $60
 print_loop
+    cpy $60
+    beq print_loop_end
+
     lda BUF,y
     jsr COUT
-    iny
-    stx $60
-    cpy $60
-    bne print_loop
 
-after_print_loop
+    iny
+    jmp print_loop
+print_loop_end
+
     jsr CROUT
     jmp main_loop
 
