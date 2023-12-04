@@ -91,21 +91,6 @@ main
 
     jsr checker
 
-    ; todo
-    jsr RDKEY
-    lda #<queen
-    sta A1
-    lda #>queen
-    sta A1+1
-    ldx #$00
-    ldy #$00
-    jsr draw_piece
-    jsr RDKEY
-    ldx #$05
-    ldy #$07
-    jsr draw_piece
-    jmp halt
-
     lda #<pawn
     sta A1
     lda #>pawn
@@ -114,10 +99,10 @@ main
 all_pawns
     ldx #$07
 pawn_row
+    jsr IOSAVE
+    jsr IOREST
     jsr draw_piece
-
-    ;; TODO
-    jmp halt
+    jsr IOREST
 
     dex
     bpl pawn_row
@@ -127,6 +112,12 @@ pawn_row
     jmp all_pawns
 done_pawns
 
+    ; TODO: clean this up hugely.
+    ; There's probably a nice way to have it mirror the two players' boards.
+    ; Maybe also can mirror the back row pieces (modulo queen/king)
+    ; (Or maybe there's a nice way to represent the list of pieces/positions
+    ; as constant data, and iterate over it? hmm...)
+
     lda #<rook
     sta A1
     lda #>rook
@@ -134,15 +125,71 @@ done_pawns
     ldy #$00
     ldx #$00
     jsr draw_piece
+    ldy #$00
     ldx #$07
     jsr draw_piece
     ldy #$07
     ldx #$00
     jsr draw_piece
+    ldy #$07
     ldx #$07
     jsr draw_piece
 
-    ; etc ...
+    lda #<knight
+    sta A1
+    lda #>knight
+    sta A1+1
+    ldy #$00
+    ldx #$01
+    jsr draw_piece
+    ldy #$00
+    ldx #$06
+    jsr draw_piece
+    ldy #$07
+    ldx #$01
+    jsr draw_piece
+    ldy #$07
+    ldx #$06
+    jsr draw_piece
+
+    lda #<bishop
+    sta A1
+    lda #>bishop
+    sta A1+1
+    ldy #$00
+    ldx #$02
+    jsr draw_piece
+    ldy #$00
+    ldx #$05
+    jsr draw_piece
+    ldy #$07
+    ldx #$02
+    jsr draw_piece
+    ldy #$07
+    ldx #$05
+    jsr draw_piece
+
+    lda #<queen
+    sta A1
+    lda #>queen
+    sta A1+1
+    ldy #$00
+    ldx #$03
+    jsr draw_piece
+    ldy #$07
+    ldx #$03
+    jsr draw_piece
+
+    lda #<king
+    sta A1
+    lda #>king
+    sta A1+1
+    ldy #$00
+    ldx #$04
+    jsr draw_piece
+    ldy #$07
+    ldx #$04
+    jsr draw_piece
 
 halt
     jmp halt
@@ -205,7 +252,6 @@ second_row
 
 ; inputs: piece (A1 = addr of sprite), coords (x,y in 0..=7)
 ; clobbers: a, x, y
-; TODO: account for clobbers in `main`
 draw_piece
     ; screen_addr := $2000
     lda #$00
@@ -327,11 +373,13 @@ king
     dfb %0_0000000
 
 knight
+    ; Note that this is flipped left-to-right,
+    ; since the screen uses lsb to the left.
     dfb %0_0000000
-    dfb %0_0010000
-    dfb %0_0001100
-    dfb %0_0001000
+    dfb %0_0000100
     dfb %0_0011000
+    dfb %0_0001000
+    dfb %0_0001100
     dfb %0_0010100
     dfb %0_0000000
 
