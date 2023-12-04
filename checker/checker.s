@@ -92,7 +92,14 @@ main
     jsr checker
 
     ; todo
-    jsr draw_pawn_to_coords_0_0
+    jsr RDKEY
+    ldx #$00
+    ldy #$00
+    jsr draw_pawn_to_coords
+    jsr RDKEY
+    ldx #$05
+    ldy #$07
+    jsr draw_pawn_to_coords
     jmp halt
 
     lda #<pawn
@@ -210,16 +217,43 @@ draw_piece
 ;   entire sprite (but keeping track of the loop index, to offset
 ;   into the sprite data)
 
-; ok. start small
-draw_pawn_to_coords_0_0
+; ok. now: computing screen offset
+; * ok, now test it
+
+draw_pawn_to_coords
     ; screen_addr := $2000
     lda #$00
     sta $60
     lda #$20
     sta $61
 
-    ldx #$00
+    ; screen_addr += 0x80 * y
+y_offset_loop
+    cpy #$00
+    beq y_offset_loop_end
 
+    lda $60
+    clc
+    adc #$80
+    sta $60
+    lda $61
+    adc #$00
+    sta $61
+
+    dey
+    jmp y_offset_loop
+y_offset_loop_end
+
+    ; screen_addr += x
+    txa
+    clc
+    adc $60
+    sta $60
+    lda $61
+    adc #$00
+    sta $61
+
+    ldx #$00
 draw_loop
     lda pawn,x
     sta ($60)
