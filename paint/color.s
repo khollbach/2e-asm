@@ -90,11 +90,9 @@ main
     bit TEXT_OFF
 main_loop
     jsr black
-    jsr green
-    jsr purple
+    ;jsr RDKEY
     jsr white
-    jsr orange
-    jsr blue
+    ;jsr RDKEY
     jmp main_loop
 
 halt
@@ -103,53 +101,18 @@ halt
 black
     lda #$00
     sta $2000
-    sta $2001
-    jsr fill_screen
-    rts
-
-green
-    lda #$2a
-    sta $2000
-    lda #$55
-    sta $2001
-    jsr fill_screen
-    rts
-
-purple
-    lda #$55
-    sta $2000
-    lda #$2a
-    sta $2001
-    jsr fill_screen
-    rts
-
-orange
-    lda #$aa
-    sta $2000
-    lda #$d5
-    sta $2001
-    jsr fill_screen
-    rts
-
-blue
-    lda #$d5
-    sta $2000
-    lda #$aa
-    sta $2001
     jsr fill_screen
     rts
 
 white
     lda #$ff
-    lda #$ff
     sta $2000
-    sta $2001
     jsr fill_screen
     rts
 
 fill_screen
-    ; dest: $2002
-    lda #$02
+    ; dest: $2001
+    lda #$01
     sta A4
     lda #$20
     sta A4+1
@@ -160,8 +123,8 @@ fill_screen
     lda #$20
     sta A1+1
 
-    ; end: $3ffd
-    lda #$fd
+    ; end: $3ffe
+    lda #$fe
     sta A2
     lda #$3f
     sta A2+1
