@@ -171,7 +171,7 @@ draw_two_rows ; fill in the blocks on one page
 
     rts
 
-; inputs: a
+; inputs: a, $60
 ; clobbers: y
 draw_page ; draw one page (two rows of thin lines)
     ldy #$00
@@ -200,24 +200,39 @@ draw_piece
 
     rts
 
+; notes
+; computing the top-left byte of the target square
+; * the x offset will be very easy; just add that amount
+; * the y offset should be a matter of "multiplying" 0x80 by y
+;   (meaning add 0x80 in a loop, y many times)
+; and then what?
+; * and then do the same loop with +0x0400 8 times to fill in the
+;   entire sprite (but keeping track of the loop index, to offset
+;   into the sprite data)
+
 ; ok. start small
 draw_pawn_to_coords_0_0
-    lda pawn
-    sta $2000
-    lda pawn+1
-    sta $2400
-    lda pawn+2
-    sta $2800
-    lda pawn+3
-    sta $2c00
-    lda pawn+4
-    sta $3000
-    lda pawn+5
-    sta $3400
-    lda pawn+6
-    sta $3800
-    lda pawn+7
-    sta $3c00
+    ; screen_addr := $2000
+    lda #$00
+    sta $60
+    lda #$20
+    sta $61
+
+    ldx #$00
+
+draw_loop
+    lda pawn,x
+    sta ($60)
+
+    ; screen_addr += $0400
+    lda $61
+    clc
+    adc #$04
+    sta $61
+
+    inx
+    cpx #$08
+    bne draw_loop
 
     rts
 
