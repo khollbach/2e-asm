@@ -1,4 +1,4 @@
-name := checker
+name := chess
 start_addr := 2000
 
 default: dsk

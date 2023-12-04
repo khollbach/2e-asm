@@ -1,4 +1,4 @@
-; Paint the screen a solid color.
+; Draw a chessboard.
 
 ; Built-in (ROM) subroutines
 COUT equ $fded
