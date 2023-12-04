@@ -93,6 +93,10 @@ main
 
     ; todo
     jsr RDKEY
+    lda #<queen
+    sta A1
+    lda #>queen
+    sta A1+1
     ldx #$00
     ldy #$00
     jsr draw_pawn_to_coords
@@ -105,7 +109,7 @@ main
     lda #<pawn
     sta A1
     lda #>pawn
-    sta A2
+    sta A1+1
     ldy #$01
 all_pawns
     ldx #$07
@@ -126,7 +130,7 @@ done_pawns
     lda #<rook
     sta A1
     lda #>rook
-    sta A2
+    sta A1+1
     ldy #$00
     ldx #$00
     jsr draw_piece
@@ -220,6 +224,10 @@ draw_piece
 ; ok. now: computing screen offset
 ; * ok, now test it
 
+; now: draw *piece* to coords
+
+; maybe we should just clobber all registers?
+
 draw_pawn_to_coords
     ; screen_addr := $2000
     lda #$00
@@ -253,9 +261,9 @@ y_offset_loop_end
     adc #$00
     sta $61
 
-    ldx #$00
+    ldy #$00
 draw_loop
-    lda pawn,x
+    lda (A1),y
     sta ($60)
 
     ; screen_addr += $0400
@@ -264,8 +272,8 @@ draw_loop
     adc #$04
     sta $61
 
-    inx
-    cpx #$08
+    iny
+    cpy #$08
     bne draw_loop
 
     rts
@@ -346,7 +354,7 @@ knight
     dfb %0_0010100
     dfb %0_0000000
 
-quuen
+queen
     dfb %0_0000000
     dfb %0_0101010
     dfb %0_0011100
