@@ -87,15 +87,7 @@ main
     jsr black
     bit HIRES_ON
     bit MIXED_OFF
-    ; bit MIXED_ON
     bit TEXT_OFF
-
-;     ; clear the text screen, and put the cursor at the bottom
-;     ldx #24
-; cursor_end
-;     jsr CROUT
-;     dex
-;     bne cursor_end
 
     jsr checker
 
@@ -109,11 +101,6 @@ checker
     sta $61
 
 draw_all_rows
-    ; jsr CROUT
-    ; lda $61
-    ; ldx $60
-    ; jsr PRNTAX
-    ; jsr RDKEY
 
 draw_two_rows ; fill in the blocks on one page
     lda #$ff
