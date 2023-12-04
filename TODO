@@ -31,6 +31,8 @@ idea:
   * chess board, w/ pieces
   * play pomp & circumstance thru the speaker ?
 
+[ ] draw pieces on the chess board by xor-ing
+
 * draw rc logo (HGR)
 * tile the screen with it
 * colors ??

@@ -84,12 +84,54 @@ actual_main
     org $6000
 
 main
-    jsr black
+    jsr black_screen
     bit HIRES_ON
     bit MIXED_OFF
     bit TEXT_OFF
 
     jsr checker
+
+    ; todo
+    jsr draw_pawn_to_coords_0_0
+    jmp halt
+
+    lda #<pawn
+    sta A1
+    lda #>pawn
+    sta A2
+    ldy #$01
+all_pawns
+    ldx #$07
+pawn_row
+    jsr draw_piece
+
+    ;; TODO
+    jmp halt
+
+    dex
+    bpl pawn_row
+    cpy #$06
+    beq done_pawns
+    ldy #$06
+    jmp all_pawns
+done_pawns
+
+    lda #<rook
+    sta A1
+    lda #>rook
+    sta A2
+    ldy #$00
+    ldx #$00
+    jsr draw_piece
+    ldx #$07
+    jsr draw_piece
+    ldy #$07
+    ldx #$00
+    jsr draw_piece
+    ldx #$07
+    jsr draw_piece
+
+    ; etc ...
 
 halt
     jmp halt
@@ -150,7 +192,36 @@ second_row
 
     rts
 
-black
+; inputs: piece (A1 = addr of sprite), coords (x,y in 0..=7)
+; clobbers ???? (TODO)
+draw_piece
+    ;todo
+    brk
+
+    rts
+
+; ok. start small
+draw_pawn_to_coords_0_0
+    lda pawn
+    sta $2000
+    lda pawn+1
+    sta $2400
+    lda pawn+2
+    sta $2800
+    lda pawn+3
+    sta $2c00
+    lda pawn+4
+    sta $3000
+    lda pawn+5
+    sta $3400
+    lda pawn+6
+    sta $3800
+    lda pawn+7
+    sta $3c00
+
+    rts
+
+black_screen
     lda #$00
     sta $2000
     sta $2001
@@ -189,6 +260,60 @@ ZERO
     hex 00
 FF
     hex ff
+
+pawn
+    dfb %0_0000000
+    dfb %0_0000000
+    dfb %0_0000000
+    dfb %0_0001000
+    dfb %0_0001000
+    dfb %0_0011100
+    dfb %0_0000000
+
+rook
+    dfb %0_0000000
+    dfb %0_0000000
+    dfb %0_0000000
+    dfb %0_0010100
+    dfb %0_0001000
+    dfb %0_0011100
+    dfb %0_0000000
+
+king
+    dfb %0_0000000
+    dfb %0_0000000
+    dfb %0_0001000
+    dfb %0_0011100
+    dfb %0_0001000
+    dfb %0_0011100
+    dfb %0_0000000
+
+knight
+    dfb %0_0000000
+    dfb %0_0010000
+    dfb %0_0001100
+    dfb %0_0001000
+    dfb %0_0011000
+    dfb %0_0010100
+    dfb %0_0000000
+
+quuen
+    dfb %0_0000000
+    dfb %0_0101010
+    dfb %0_0011100
+    dfb %0_0001000
+    dfb %0_0011100
+    dfb %0_0111110
+    dfb %0_0000000
+
+bishop
+    dfb %0_0000000
+    dfb %0_0001000
+    dfb %0_0001000
+    dfb %0_0001000
+    dfb %0_0011100
+    dfb %0_0111110
+    dfb %0_0000000
 
     brk
     brk
