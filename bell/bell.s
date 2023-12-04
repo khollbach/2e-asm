@@ -16,35 +16,59 @@ HOME equ $fc58
 PRBLNK equ $f948
 PRHEX equ $fde3
 PRBYTE equ $fdda
-PRTAX equ $f941
+PRNTAX equ $f941
 SETINV equ $fe80
 SETNORM equ $fe84
 ; Relevant memory locations
 CH equ $24
 CV equ $25
 PROMPT equ $33
+A1 equ $3c
+A2 equ $3e
+A4 equ $42
 RNDL equ $4e
 RNDH equ $4f
 BUF equ $0200
 ; I/O locations
 SPKR equ $c030 ; read to toggle
+TEXT_OFF equ $c050
+TEXT_ON equ $c051
+MIXED_OFF equ $c052
+MIXED_ON equ $c053
+HIRES_OFF equ $c056
+HIRES_ON equ $c057
 
     org $2000
 
+;[ ] first, get bell code to work
+;    [x] try the person's example code from the internet
+;        (works! we even got a sliding pitch (that wraps around))
+;    [ ] get WAIT-based code to work, for an infinite tone
+;    [ ] then get the bell code working
+;[ ] then, get different pitches to work
+;    [ ] a function that accepts a pitch (or maybe some other #)
+;        and plays an infinite tone
+;    [ ] the same, but with a duration as well (at least enough
+;        resolution to do P&S)
+;    [ ] string up a song from it
+
 main
     jsr HOME
-main_loop
-    jsr RDKEY
-    jsr bell
 
-;     ; expecting ~10 seconds pause
-;     ldy #100
-; wait_loop
+; TODO: debug this at some point
+
+; main_loop
+;     jsr RDKEY
 ;     jsr bell
-;     dey
-;     bne wait_loop
 
-    jmp main_loop
+; ;     ; expecting ~10 seconds pause
+; ;     ldy #100
+; ; wait_loop
+; ;     jsr bell
+; ;     dey
+; ;     bne wait_loop
+
+;     jmp main_loop
 
 halt
     jmp halt
