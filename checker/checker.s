@@ -99,11 +99,11 @@ main
     sta A1+1
     ldx #$00
     ldy #$00
-    jsr draw_pawn_to_coords
+    jsr draw_piece
     jsr RDKEY
     ldx #$05
     ldy #$07
-    jsr draw_pawn_to_coords
+    jsr draw_piece
     jmp halt
 
     lda #<pawn
@@ -204,31 +204,9 @@ second_row
     rts
 
 ; inputs: piece (A1 = addr of sprite), coords (x,y in 0..=7)
-; clobbers ???? (TODO)
+; clobbers: a, x, y
+; TODO: account for clobbers in `main`
 draw_piece
-    ;todo
-    brk
-
-    rts
-
-; notes
-; computing the top-left byte of the target square
-; * the x offset will be very easy; just add that amount
-; * the y offset should be a matter of "multiplying" 0x80 by y
-;   (meaning add 0x80 in a loop, y many times)
-; and then what?
-; * and then do the same loop with +0x0400 8 times to fill in the
-;   entire sprite (but keeping track of the loop index, to offset
-;   into the sprite data)
-
-; ok. now: computing screen offset
-; * ok, now test it
-
-; now: draw *piece* to coords
-
-; maybe we should just clobber all registers?
-
-draw_pawn_to_coords
     ; screen_addr := $2000
     lda #$00
     sta $60
@@ -264,7 +242,10 @@ y_offset_loop_end
     ldy #$00
 draw_loop
     lda (A1),y
-    sta ($60)
+
+    ldx #$00
+    eor ($60,x)
+    sta ($60,x)
 
     ; screen_addr += $0400
     lda $61
