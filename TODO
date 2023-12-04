@@ -24,9 +24,12 @@ Program ideas:
 [x] PRBYTE
 [x] PRNTAX
 
-[ ] paint screen solid color (HGR)
-    * toggle on keypress
-* checker board pattern in HGR (8x8 or whole screen)
+[x] paint screen solid colors (HGR)
+[x] 8x8 checker board pattern (HGR)
+
+idea:
+  * chess board, w/ pieces
+  * play pomp & circumstance thru the speaker ?
 
 * draw rc logo (HGR)
 * tile the screen with it
