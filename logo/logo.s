@@ -49,6 +49,11 @@ HIRES_ON equ $c057
 ; like $20ab, before being copied to $6000. But the second `org` command *does*
 ; ensure that the main code has correct the jump addresses for being loaded and
 ; run starting at $6000.
+;
+; NOTE: if/when the main program gets to be more than 4KiB in size, we'll need
+; to adjust this code to copy from high-to-low instead. (So we'll probably need
+; to write our own memcpy routine.) As-is, the MOVE routine would overwrite the
+; part of the data from $6000 onwards before it has a chance to read it.
     org $2000
 
     ; dest: $6000
