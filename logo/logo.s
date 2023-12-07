@@ -92,37 +92,22 @@ actual_main
 main
     jsr black_screen
     bit HIRES_ON
-    ;bit MIXED_OFF
-    bit MIXED_ON ; todo
+    bit MIXED_OFF
     bit TEXT_OFF
-
-    ; clear screen; cursor to bottom
-    jsr HOME
-    ldx #$28
-cursor_end
-    jsr CROUT
-    dex
-    bne cursor_end
 
     ldy #$00
 loop_y
     ldx #$00
-; loop_x
+loop_x
 
-    jsr black_screen
     jsr draw_sprite
 
-    tya
-    jsr PRNTAX
-    jsr IOSAVE
-    jsr CROUT
-    jsr RDKEY
-    jsr IOREST
+    inx
+    inx
+    cpx #$28
+    bne loop_x
 
-    ; inx
-    ; cpx #$28
-    ; bne loop_x
-
+    iny
     iny
     cpy #$18
     bne loop_y
