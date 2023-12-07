@@ -223,11 +223,10 @@ band_offset_loop_end
     lda $61
     ror a ; carry input is still clear from above
     sta $62
+    ; "underflow" the carry output into the low byte
     lda #$00
+    ror a
     sta $61
-    bcc block_offset_end
-    inc $61
-block_offset_end
 
     ; base_addr := $2000 + band_offset + block_offset + x
     ; low byte (which can't overflow in this case)
