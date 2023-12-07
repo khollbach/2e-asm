@@ -141,7 +141,6 @@ blue
 
 white
     lda #$ff
-    lda #$ff
     sta $2000
     sta $2001
     jsr fill_screen
