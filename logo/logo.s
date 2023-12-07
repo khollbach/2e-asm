@@ -14,6 +14,7 @@ WAIT equ $fca8
 BELL equ $ff3a
 HOME equ $fc58
 PRBLNK equ $f948
+PRBL2 equ $f94a
 PRHEX equ $fde3
 PRBYTE equ $fdda
 PRNTAX equ $f941
@@ -91,541 +92,158 @@ actual_main
 main
     jsr black_screen
     bit HIRES_ON
-    bit MIXED_OFF
+    ;bit MIXED_OFF
+    bit MIXED_ON ; todo
     bit TEXT_OFF
 
-    ; lda sprite  ; $abcd
-    ; ;lda #%0111011
-    ; sta $2000
-    ; jsr RDKEY
-    ; lda sprite+1
-    ; sta $2001
-    ; jsr RDKEY
-    ; lda sprite+2
-    ; sta $2400
-    ; jsr RDKEY
-    ; lda sprite+3
-    ; sta $2401
-    ; jsr RDKEY
+    ; clear screen; cursor to bottom
+    jsr HOME
+    ldx #$28
+cursor_end
+    jsr CROUT
+    dex
+    bne cursor_end
 
-    ; lda #%0_1111110
-    ; sta $2000
-    ; lda #%0_0111111
-    ; sta $2001
-    ; lda #%0_0000010
-    ; sta $2400
-    ; lda #%0_0100000
-    ; sta $2401
-    ; lda #%0_1111010
-    ; sta $2800
-    ; lda #%0_0101111
-    ; sta $2801
-    ; lda #%0_1010010
-    ; sta $2c00
-    ; lda #%0_0101110
-    ; sta $2c01
-    ; lda #%0_1111010
-    ; sta $3000
-    ; lda #%0_0101111
-    ; sta $3001
-    ; lda #%0_1001010
-    ; sta $3400
-    ; lda #%0_0101100
-    ; sta $3401
-    ; lda #%0_1111010
-    ; sta $3800
-    ; lda #%0_0101111
-    ; sta $3801
-    ; lda #%0_1111010
-    ; sta $3c00
-    ; lda #%0_0101111
-    ; sta $3c01
-    ; lda #%0_0000010
-    ; sta $2080
-    ; lda #%0_0100000
-    ; sta $2081
-    ; lda #%0_1111110
-    ; sta $2480
-    ; lda #%0_0111111
-    ; sta $2481
-    ; lda #%0_1100000
-    ; sta $2880
-    ; lda #%0_0000011
-    ; sta $2881
-    ; lda #%0_1111100
-    ; sta $2c80
-    ; lda #%0_0011111
-    ; sta $2c81
-    ; lda #%0_0101110
-    ; sta $3080
-    ; lda #%0_0110101
-    ; sta $3081
-    ; lda #%0_1010110
-    ; sta $3480
-    ; lda #%0_0111010
-    ; sta $3481
-    ; lda #%0_1111110
-    ; sta $3880
-    ; lda #%0_0111111
-    ; sta $3881
-    ; lda #%0_0000000
-    ; sta $3c80
-    ; lda #%0_0000000
-    ; sta $3c81
+    ldy #$00
+loop_y
+    ldx #$00
+; loop_x
 
-    ; lda #%0_1111110
-    ; sta $2387
-    ; lda #%0_0111111
-    ; sta $2388
-    ; lda #%0_0000010
-    ; sta $2787
-    ; lda #%0_0100000
-    ; sta $2788
-    ; lda #%0_1111010
-    ; sta $2b87
-    ; lda #%0_0101111
-    ; sta $2b88
-    ; lda #%0_1010010
-    ; sta $2f87
-    ; lda #%0_0101110
-    ; sta $2f88
-    ; lda #%0_1111010
-    ; sta $3387
-    ; lda #%0_0101111
-    ; sta $3388
-    ; lda #%0_1001010
-    ; sta $3787
-    ; lda #%0_0101100
-    ; sta $3788
-    ; lda #%0_1111010
-    ; sta $3b87
-    ; lda #%0_0101111
-    ; sta $3b88
-    ; lda #%0_1111010
-    ; sta $3f87
-    ; lda #%0_0101111
-    ; sta $3f88
-    ; lda #%0_0000010
-    ; sta $202f
-    ; lda #%0_0100000
-    ; sta $2030
-    ; lda #%0_1111110
-    ; sta $242f
-    ; lda #%0_0111111
-    ; sta $2430
-    ; lda #%0_1100000
-    ; sta $282f
-    ; lda #%0_0000011
-    ; sta $2830
-    ; lda #%0_1111100
-    ; sta $2c2f
-    ; lda #%0_0011111
-    ; sta $2c30
-    ; lda #%0_0101110
-    ; sta $302f
-    ; lda #%0_0110101
-    ; sta $3030
-    ; lda #%0_1010110
-    ; sta $342f
-    ; lda #%0_0111010
-    ; sta $3430
-    ; lda #%0_1111110
-    ; sta $382f
-    ; lda #%0_0111111
-    ; sta $3830
-    ; lda #%0_0000000
-    ; sta $3c2f
-    ; lda #%0_0000000
-    ; sta $3c30
+    jsr black_screen
+    jsr draw_sprite
 
-    lda #%0_1111110
-    sta $2000
-    lda #%0_0111111
-    sta $2001
-    lda #%0_0000010
-    sta $2400
-    lda #%0_0100000
-    sta $2401
-    lda #%0_1111010
-    sta $2800
-    lda #%0_0101111
-    sta $2801
-    lda #%0_1010010
-    sta $2c00
-    lda #%0_0101110
-    sta $2c01
-    lda #%0_1111010
-    sta $3000
-    lda #%0_0101111
-    sta $3001
-    lda #%0_1001010
-    sta $3400
-    lda #%0_0101100
-    sta $3401
-    lda #%0_1111010
-    sta $3800
-    lda #%0_0101111
-    sta $3801
-    lda #%0_1111010
-    sta $3c00
-    lda #%0_0101111
-    sta $3c01
-    lda #%0_0000010
-    sta $2080
-    lda #%0_0100000
-    sta $2081
-    lda #%0_1111110
-    sta $2480
-    lda #%0_0111111
-    sta $2481
-    lda #%0_1100000
-    sta $2880
-    lda #%0_0000011
-    sta $2881
-    lda #%0_1111100
-    sta $2c80
-    lda #%0_0011111
-    sta $2c81
-    lda #%0_0101110
-    sta $3080
-    lda #%0_0110101
-    sta $3081
-    lda #%0_1010110
-    sta $3480
-    lda #%0_0111010
-    sta $3481
-    lda #%0_1111110
-    sta $3880
-    lda #%0_0111111
-    sta $3881
-    lda #%0_0000000
-    sta $3c80
-    lda #%0_0000000
-    sta $3c81
-    lda #%0_1111110
-    sta $2002
-    lda #%0_0111111
-    sta $2003
-    lda #%0_0000010
-    sta $2402
-    lda #%0_0100000
-    sta $2403
-    lda #%0_1111010
-    sta $2802
-    lda #%0_0101111
-    sta $2803
-    lda #%0_1010010
-    sta $2c02
-    lda #%0_0101110
-    sta $2c03
-    lda #%0_1111010
-    sta $3002
-    lda #%0_0101111
-    sta $3003
-    lda #%0_1001010
-    sta $3402
-    lda #%0_0101100
-    sta $3403
-    lda #%0_1111010
-    sta $3802
-    lda #%0_0101111
-    sta $3803
-    lda #%0_1111010
-    sta $3c02
-    lda #%0_0101111
-    sta $3c03
-    lda #%0_0000010
-    sta $2082
-    lda #%0_0100000
-    sta $2083
-    lda #%0_1111110
-    sta $2482
-    lda #%0_0111111
-    sta $2483
-    lda #%0_1100000
-    sta $2882
-    lda #%0_0000011
-    sta $2883
-    lda #%0_1111100
-    sta $2c82
-    lda #%0_0011111
-    sta $2c83
-    lda #%0_0101110
-    sta $3082
-    lda #%0_0110101
-    sta $3083
-    lda #%0_1010110
-    sta $3482
-    lda #%0_0111010
-    sta $3483
-    lda #%0_1111110
-    sta $3882
-    lda #%0_0111111
-    sta $3883
-    lda #%0_0000000
-    sta $3c82
-    lda #%0_0000000
-    sta $3c83
-    lda #%0_1111110
-    sta $2004
-    lda #%0_0111111
-    sta $2005
-    lda #%0_0000010
-    sta $2404
-    lda #%0_0100000
-    sta $2405
-    lda #%0_1111010
-    sta $2804
-    lda #%0_0101111
-    sta $2805
-    lda #%0_1010010
-    sta $2c04
-    lda #%0_0101110
-    sta $2c05
-    lda #%0_1111010
-    sta $3004
-    lda #%0_0101111
-    sta $3005
-    lda #%0_1001010
-    sta $3404
-    lda #%0_0101100
-    sta $3405
-    lda #%0_1111010
-    sta $3804
-    lda #%0_0101111
-    sta $3805
-    lda #%0_1111010
-    sta $3c04
-    lda #%0_0101111
-    sta $3c05
-    lda #%0_0000010
-    sta $2084
-    lda #%0_0100000
-    sta $2085
-    lda #%0_1111110
-    sta $2484
-    lda #%0_0111111
-    sta $2485
-    lda #%0_1100000
-    sta $2884
-    lda #%0_0000011
-    sta $2885
-    lda #%0_1111100
-    sta $2c84
-    lda #%0_0011111
-    sta $2c85
-    lda #%0_0101110
-    sta $3084
-    lda #%0_0110101
-    sta $3085
-    lda #%0_1010110
-    sta $3484
-    lda #%0_0111010
-    sta $3485
-    lda #%0_1111110
-    sta $3884
-    lda #%0_0111111
-    sta $3885
-    lda #%0_0000000
-    sta $3c84
-    lda #%0_0000000
-    sta $3c85
-    lda #%0_1111110
-    sta $2100
-    lda #%0_0111111
-    sta $2101
-    lda #%0_0000010
-    sta $2500
-    lda #%0_0100000
-    sta $2501
-    lda #%0_1111010
-    sta $2900
-    lda #%0_0101111
-    sta $2901
-    lda #%0_1010010
-    sta $2d00
-    lda #%0_0101110
-    sta $2d01
-    lda #%0_1111010
-    sta $3100
-    lda #%0_0101111
-    sta $3101
-    lda #%0_1001010
-    sta $3500
-    lda #%0_0101100
-    sta $3501
-    lda #%0_1111010
-    sta $3900
-    lda #%0_0101111
-    sta $3901
-    lda #%0_1111010
-    sta $3d00
-    lda #%0_0101111
-    sta $3d01
-    lda #%0_0000010
-    sta $2180
-    lda #%0_0100000
-    sta $2181
-    lda #%0_1111110
-    sta $2580
-    lda #%0_0111111
-    sta $2581
-    lda #%0_1100000
-    sta $2980
-    lda #%0_0000011
-    sta $2981
-    lda #%0_1111100
-    sta $2d80
-    lda #%0_0011111
-    sta $2d81
-    lda #%0_0101110
-    sta $3180
-    lda #%0_0110101
-    sta $3181
-    lda #%0_1010110
-    sta $3580
-    lda #%0_0111010
-    sta $3581
-    lda #%0_1111110
-    sta $3980
-    lda #%0_0111111
-    sta $3981
-    lda #%0_0000000
-    sta $3d80
-    lda #%0_0000000
-    sta $3d81
-    lda #%0_1111110
-    sta $2102
-    lda #%0_0111111
-    sta $2103
-    lda #%0_0000010
-    sta $2502
-    lda #%0_0100000
-    sta $2503
-    lda #%0_1111010
-    sta $2902
-    lda #%0_0101111
-    sta $2903
-    lda #%0_1010010
-    sta $2d02
-    lda #%0_0101110
-    sta $2d03
-    lda #%0_1111010
-    sta $3102
-    lda #%0_0101111
-    sta $3103
-    lda #%0_1001010
-    sta $3502
-    lda #%0_0101100
-    sta $3503
-    lda #%0_1111010
-    sta $3902
-    lda #%0_0101111
-    sta $3903
-    lda #%0_1111010
-    sta $3d02
-    lda #%0_0101111
-    sta $3d03
-    lda #%0_0000010
-    sta $2182
-    lda #%0_0100000
-    sta $2183
-    lda #%0_1111110
-    sta $2582
-    lda #%0_0111111
-    sta $2583
-    lda #%0_1100000
-    sta $2982
-    lda #%0_0000011
-    sta $2983
-    lda #%0_1111100
-    sta $2d82
-    lda #%0_0011111
-    sta $2d83
-    lda #%0_0101110
-    sta $3182
-    lda #%0_0110101
-    sta $3183
-    lda #%0_1010110
-    sta $3582
-    lda #%0_0111010
-    sta $3583
-    lda #%0_1111110
-    sta $3982
-    lda #%0_0111111
-    sta $3983
-    lda #%0_0000000
-    sta $3d82
-    lda #%0_0000000
-    sta $3d83
-    lda #%0_1111110
-    sta $2104
-    lda #%0_0111111
-    sta $2105
-    lda #%0_0000010
-    sta $2504
-    lda #%0_0100000
-    sta $2505
-    lda #%0_1111010
-    sta $2904
-    lda #%0_0101111
-    sta $2905
-    lda #%0_1010010
-    sta $2d04
-    lda #%0_0101110
-    sta $2d05
-    lda #%0_1111010
-    sta $3104
-    lda #%0_0101111
-    sta $3105
-    lda #%0_1001010
-    sta $3504
-    lda #%0_0101100
-    sta $3505
-    lda #%0_1111010
-    sta $3904
-    lda #%0_0101111
-    sta $3905
-    lda #%0_1111010
-    sta $3d04
-    lda #%0_0101111
-    sta $3d05
-    lda #%0_0000010
-    sta $2184
-    lda #%0_0100000
-    sta $2185
-    lda #%0_1111110
-    sta $2584
-    lda #%0_0111111
-    sta $2585
-    lda #%0_1100000
-    sta $2984
-    lda #%0_0000011
-    sta $2985
-    lda #%0_1111100
-    sta $2d84
-    lda #%0_0011111
-    sta $2d85
-    lda #%0_0101110
-    sta $3184
-    lda #%0_0110101
-    sta $3185
-    lda #%0_1010110
-    sta $3584
-    lda #%0_0111010
-    sta $3585
-    lda #%0_1111110
-    sta $3984
-    lda #%0_0111111
-    sta $3985
-    lda #%0_0000000
-    sta $3d84
-    lda #%0_0000000
-    sta $3d85
+    tya
+    jsr PRNTAX
+    jsr IOSAVE
+    jsr CROUT
+    jsr RDKEY
+    jsr IOREST
+
+    ; inx
+    ; cpx #$28
+    ; bne loop_x
+
+    iny
+    cpy #$18
+    bne loop_y
 
 halt
     jmp halt
 
+; inputs: x in 0..=38, y in 0..=22 (decimal)
+; clobbers nothing
+draw_sprite
+    ; Draw the quadrants in clockwise order.
+
+    lda #<top_left
+    sta A1
+    lda #>top_left
+    sta A1+1
+    jsr draw_quadrant
+
+    inx
+    lda #<top_right
+    sta A1
+    lda #>top_right
+    sta A1+1
+    jsr draw_quadrant
+
+    iny
+    lda #<bottom_right
+    sta A1
+    lda #>bottom_right
+    sta A1+1
+    jsr draw_quadrant
+
+    dex
+    lda #<bottom_left
+    sta A1
+    lda #>bottom_left
+    sta A1+1
+    jsr draw_quadrant
+
+    dey
+    rts
+
+; inputs: x in 0..40, y in 0..24, A1 pointing to sprite data
+; clobbers nothing
+draw_quadrant
+    tya
+    pha
+
+    jsr base_addr
+
+    ldy #$00
+draw_pixel_rows
+    lda (A1),y
+    sta (A4)
+
+    lda A4+1
+    adc #$04
+    sta A4+1
+
+    iny
+    cpy #$08
+    bne draw_pixel_rows
+
+    pla
+    tay
+    rts
+
+; inputs: x,y
+; clobbers: a
+; output: A4
+base_addr
+    ; Which band? (0, 1, or 2)
+    tya
+    lsr a ; shift right three times (i.e. divide by 8)
+    lsr a
+    lsr a
+    sta $60
+
+    ; Which block within the band? (0..=7)
+    tya
+    and #$08-1 ; keep lowest three bits (i.e. y modulo 8)
+    sta $61
+
+    ; Compute band offset; store in $60.
+    ; Multiplication is done by iterated addition.
+    lda #$00
+    clc
+band_offset_loop
+    dec $60
+    bmi band_offset_loop_end
+    adc #$28
+    jmp band_offset_loop
+band_offset_loop_end
+    sta $60
+
+    ; Compute block offset; store in $61,$62.
+    ; Multiplying by $80 is kind of like dividing by 2.
+    lda $61
+    ror a ; carry input is still clear from above
+    sta $62
+    lda #$00
+    sta $61
+    bcc block_offset_end
+    inc $61
+block_offset_end
+
+    ; base_addr := $2000 + band_offset + block_offset + x
+    ; low byte (which can't overflow in this case)
+    lda $60
+    adc $61
+    stx $60
+    adc $60
+    sta A4
+    ; high byte
+    lda #$20
+    adc $62
+    sta A4+1
+
+    rts
+
+; clobbers: a
 black_screen
     lda #$00
     sta $2000
@@ -633,6 +251,7 @@ black_screen
     jsr fill_screen
     rts
 
+; clobbers nothing
 fill_screen
     ; dest: $2002
     lda #$02
@@ -652,9 +271,11 @@ fill_screen
     lda #$3f
     sta A2+1
 
+    jsr IOSAVE
+    jsr IOREST
     ldy #$00
     jsr MOVE
-
+    jsr IOREST
     rts
 
     brk
@@ -666,24 +287,49 @@ ZERO
 FF
     hex ff
 
-; (note that the last 7 bits are in reverse order)
+; Note that the bits are "reversed" in the sprite data. This is because the
+; constant values are written down in msb-first order, but the Apple II display
+; memory mapping uses lsb-first order.
 sprite
-    dfb %0_1111110, %0_0111111
-    dfb %0_0000010, %0_0100000
-    dfb %0_1111010, %0_0101111
-    dfb %0_1010010, %0_0101110
-    dfb %0_1111010, %0_0101111
-    dfb %0_1001010, %0_0101100
-    dfb %0_1111010, %0_0101111
-    dfb %0_1111010, %0_0101111
-    dfb %0_0000010, %0_0100000
-    dfb %0_1111110, %0_0111111
-    dfb %0_1100000, %0_0000011
-    dfb %0_1111100, %0_0011111
-    dfb %0_0101110, %0_0110101
-    dfb %0_1010110, %0_0111010
-    dfb %0_1111110, %0_0111111
-    dfb %0_0000000, %0_0000000
+top_left
+    dfb %0_1111110
+    dfb %0_0000010
+    dfb %0_1111010
+    dfb %0_1010010
+    dfb %0_1111010
+    dfb %0_1001010
+    dfb %0_1111010
+    dfb %0_1111010
+
+top_right
+    dfb %0_0111111
+    dfb %0_0100000
+    dfb %0_0101111
+    dfb %0_0101110
+    dfb %0_0101111
+    dfb %0_0101100
+    dfb %0_0101111
+    dfb %0_0101111
+
+bottom_left
+    dfb %0_0000010
+    dfb %0_1111110
+    dfb %0_1100000
+    dfb %0_1111100
+    dfb %0_0101110
+    dfb %0_1010110
+    dfb %0_1111110
+    dfb %0_0000000
+
+bottom_right
+    dfb %0_0100000
+    dfb %0_0111111
+    dfb %0_0000011
+    dfb %0_0011111
+    dfb %0_0110101
+    dfb %0_0111010
+    dfb %0_0111111
+    dfb %0_0000000
 
     brk
     brk
