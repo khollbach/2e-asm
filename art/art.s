@@ -23,6 +23,7 @@ SETNORM equ $fe84
 ; Relevant memory locations
 CH equ $24
 CV equ $25
+INVFLAG equ $32
 PROMPT equ $33
 A1 equ $3c
 A2 equ $3e
@@ -39,6 +40,9 @@ MIXED_ON equ $c053
 HIRES_OFF equ $c056
 HIRES_ON equ $c057
 
+; Global variable.
+flag_bit equ $ff
+
 ; This is a terrible hack.
 ;
 ; We put a tiny bit of code at $2000, where prodos loads our program into
@@ -50,13 +54,6 @@ HIRES_ON equ $c057
 ; like $20ab, before being copied to $6000. But the second `org` command *does*
 ; ensure that the main code has correct the jump addresses for being loaded and
 ; run starting at $6000.
-;
-; NOTE: if/when the main program gets to be more than 16KiB in size, we'll need
-; to adjust this code to copy from high-to-low instead. (So we'll probably need
-; to write our own memcpy routine.) As-is, the MOVE routine would overwrite the
-; part of the data from $6000 onwards before it has a chance to read it.
-; (Update: I originally thought we had a 4KiB limit... 16K is more than we'll
-; ever use, so it's fine.)
     org $2000
 
     ; dest: $6000
@@ -97,22 +94,43 @@ main
     bit MIXED_OFF
     bit TEXT_OFF
 
+main_loop
+    jsr disable_rng
+    jsr tile_screen
+    jsr RDKEY
+
+    jsr seed_rng
+    jsr tile_screen
+    jsr RDKEY
+
+    jmp main_loop
+
+halt
+    jmp halt
+
+tile_screen
+    ; Set initial flag bits.
+    lda #$00
+    sta flag_bit
+    jsr set_sprite_flag_bits
+
     ldy #$00
 loop_y
     ldx #$00
 
+    ; Every odd line, draw a half-logo at the start and end
+    ; of the line, and then shift the x coord over by 1.
     tya
     bit #$02
     beq loop_x
-
-    jsr toggle_sprite_flag_bits
+    jsr set_sprite_flag_bits
     jsr draw_split_logo
-    jsr toggle_sprite_flag_bits
+    jsr set_sprite_flag_bits
     ldx #$01
 
 loop_x
     jsr draw_sprite
-    jsr toggle_sprite_flag_bits
+    jsr set_sprite_flag_bits
 
     inx
     inx
@@ -124,8 +142,7 @@ loop_x
     cpy #$18
     bmi loop_y
 
-halt
-    jmp halt
+    rts
 
 ; inputs: x in 0..=38, y in 0..=22 (decimal)
 ; clobbers nothing
@@ -274,8 +291,15 @@ band_offset_loop_end
 
     rts
 
+; Set the sprite flag bits according to the value in flag_bit.
+;
+; But if the RNG was *seeded* (with a non-zero value), then
+; instead scramble the sprite's flag bits.
+;
+; inputs: flag_bit (should be either $00 or $80); rng state
 ; clobbers: $60,61
-toggle_sprite_flag_bits
+; outputs: toggles flag_bit if RNG is disabled
+set_sprite_flag_bits
     jsr IOSAVE
 
     lda #<sprite
@@ -285,9 +309,17 @@ toggle_sprite_flag_bits
 
     ldy #$00
     ldx #$20
-toggle_loop
+ssfb_loop
+    ; Flip a coin if the RNG was seeded; else do nothing.
+    jsr rng_next
+    and #$80
+    eor flag_bit
+    sta flag_bit
+
+    ; Set flag bit.
     lda ($60),y
-    eor #$80
+    and #$7f
+    ora flag_bit
     sta ($60),y
 
     clc
@@ -299,9 +331,43 @@ toggle_loop
     sta $61
 
     dex
-    bne toggle_loop
+    bne ssfb_loop
+
+    ; Toggle.
+    lda flag_bit
+    eor #$80
+    sta flag_bit
 
     jsr IOREST
+    rts
+
+; clobbers: a
+seed_rng
+    lda #$ab ; Use a fixed seed of $ab.
+    sta $fe
+    rts
+
+; Seed the RNG with zero, after which it will keep emitting zeros.
+; clobbers: a
+disable_rng
+    lda #$00
+    sta $fe
+    rts
+
+; naive xorshift rng, from:
+; https://codebase64.org/doku.php?id=base:small_fast_8-bit_prng
+;
+; Note: if the seed is zero, it will only generate more zeros.
+; 
+; inputs: $fe
+; outputs: a
+rng_next
+    lda $fe
+    asl
+    bcc no_eor
+    eor #$1d
+no_eor
+    sta $fe
     rts
 
 ; clobbers: a
