@@ -37,10 +37,13 @@ TEXT_OFF equ $c050
 TEXT_ON equ $c051
 MIXED_OFF equ $c052
 MIXED_ON equ $c053
+PAGE2_OFF equ $c054
+PAGE2_ON equ $c055
 HIRES_OFF equ $c056
 HIRES_ON equ $c057
 
-; Global variable.
+; Global variables.
+rng_state equ $fe
 flag_bit equ $ff
 
 ; This is a terrible hack.
@@ -89,18 +92,31 @@ actual_main
     org $6000
 
 main
+    ; Glitched version (written to Page 2).
+    jsr seed_rng
+    lda #$20
+    sta A2
+    jsr tile_screen
+
+    ; Black the screen, so the user can see
+    ; the first screen painted in real time.
     jsr black_screen
     bit HIRES_ON
     bit MIXED_OFF
     bit TEXT_OFF
 
-main_loop
+    ; Original tiling.
     jsr disable_rng
+    lda #$00
+    sta A2
     jsr tile_screen
+
+    ; Switch back and forth on keypress.
+main_loop
+    bit PAGE2_OFF
     jsr RDKEY
 
-    jsr seed_rng
-    jsr tile_screen
+    bit PAGE2_ON
     jsr RDKEY
 
     jmp main_loop
@@ -108,6 +124,7 @@ main_loop
 halt
     jmp halt
 
+; inputs: A2 (#$00 or #$20 for Page1 or Page2)
 tile_screen
     ; Set initial flag bits.
     lda #$00
@@ -118,13 +135,13 @@ tile_screen
 loop_y
     ldx #$00
 
-    ; Every odd line, draw a half-logo at the start and end
-    ; of the line, and then shift the x coord over by 1.
+    ; Every odd line, draw a half-logo at the start of the line,
+    ; and then shift the x coord over by 1.
     tya
     bit #$02
     beq loop_x
     jsr set_sprite_flag_bits
-    jsr draw_split_logo
+    jsr draw_half_logo
     jsr set_sprite_flag_bits
     ldx #$01
 
@@ -137,6 +154,15 @@ loop_x
     cpx #$28-1
     bmi loop_x
 
+    ; On odd lines, draw the other half-logo at the end of the line.
+    tya
+    bit #$02
+    beq inc_y
+    jsr set_sprite_flag_bits
+    jsr draw_other_half_logo
+    jsr set_sprite_flag_bits
+
+inc_y
     iny
     iny
     cpy #$18
@@ -145,6 +171,7 @@ loop_x
     rts
 
 ; inputs: x in 0..=38, y in 0..=22 (decimal)
+;   A2 (#$00 or #$20 for Page1 or Page2)
 ; clobbers nothing
 draw_sprite
     ; Draw the quadrants in clockwise order.
@@ -179,11 +206,10 @@ draw_sprite
     dey
     rts
 
-; input: y in 0..=22 (decimal)
+; inputs: y in 0..=22 (decimal)
+;   A2 (#$00 or #$20 for Page1 or Page2)
 ; clobbers: x
-draw_split_logo
-    ; Draw the quadrants in clockwise order.
-
+draw_half_logo
     ldx #$00
     lda #<top_right
     sta A1
@@ -198,7 +224,21 @@ draw_split_logo
     sta A1+1
     jsr draw_quadrant
 
+    dey
+    rts
+
+; inputs: y in 0..=22 (decimal)
+;   A2 (#$00 or #$20 for Page1 or Page2)
+; clobbers: x
+draw_other_half_logo
     ldx #$28-1
+    lda #<top_left
+    sta A1
+    lda #>top_left
+    sta A1+1
+    jsr draw_quadrant
+
+    iny
     lda #<bottom_left
     sta A1
     lda #>bottom_left
@@ -206,15 +246,11 @@ draw_split_logo
     jsr draw_quadrant
 
     dey
-    lda #<top_left
-    sta A1
-    lda #>top_left
-    sta A1+1
-    jsr draw_quadrant
-
     rts
 
-; inputs: x in 0..40, y in 0..24, A1 pointing to sprite data
+; inputs: x in 0..40, y in 0..24
+;   A1 pointing to sprite data
+;   A2 (#$00 or #$20 for Page1 or Page2)
 ; clobbers nothing
 draw_quadrant
     tya
@@ -239,7 +275,8 @@ draw_pixel_rows
     tay
     rts
 
-; inputs: x,y
+; inputs: x, y
+;   A2 (#$00 or #$20 for Page1 or Page2)
 ; clobbers: a
 ; output: A4
 base_addr
@@ -287,6 +324,7 @@ band_offset_loop_end
     ; high byte
     lda #$20
     adc $62
+    adc A2 ; Optionally +$2000 for Page 2.
     sta A4+1
 
     rts
@@ -344,14 +382,14 @@ ssfb_loop
 ; clobbers: a
 seed_rng
     lda #$ab ; Use a fixed seed of $ab.
-    sta $fe
+    sta rng_state
     rts
 
 ; Seed the RNG with zero, after which it will keep emitting zeros.
 ; clobbers: a
 disable_rng
     lda #$00
-    sta $fe
+    sta rng_state
     rts
 
 ; naive xorshift rng, from:
@@ -359,15 +397,15 @@ disable_rng
 ;
 ; Note: if the seed is zero, it will only generate more zeros.
 ; 
-; inputs: $fe
+; inputs: rng_state
 ; outputs: a
 rng_next
-    lda $fe
+    lda rng_state
     asl
     bcc no_eor
     eor #$1d
 no_eor
-    sta $fe
+    sta rng_state
     rts
 
 ; clobbers: a
