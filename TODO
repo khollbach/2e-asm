@@ -28,9 +28,10 @@ Program ideas:
 [x] 8x8 checker board pattern (HGR)
 [x] chess pieces; pixel art by Sammy
 
-[ ] draw rc logo (HGR)
+[x] draw rc logo (HGR)
+[x] tile the screen with it
+[x] play with artifact colors, and flag bits
+[ ] colors
 
-* tile the screen with it
-* colors
 * DHGR
 
