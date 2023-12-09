@@ -32,6 +32,7 @@ RNDL equ $4e
 RNDH equ $4f
 BUF equ $0200
 ; I/O locations
+KBD equ $c000 ; high bit indicates if there's pending input
 SPKR equ $c030 ; read to toggle
 TEXT_OFF equ $c050
 TEXT_ON equ $c051
@@ -99,13 +100,17 @@ main
     jsr tile_screen
 
     ; Black the screen, so the user can see
-    ; the first screen painted in real time.
+    ; the initial screen paint in real time.
     jsr black_screen
     bit HIRES_ON
     bit MIXED_OFF
     bit TEXT_OFF
 
-    ; Original tiling.
+    ; Clear the input buffer, so the user doesn't accidentally
+    ; switch screens before they know what's going on.
+    jsr clear_input_buffer
+
+    ; Original version.
     jsr disable_rng
     lda #$00
     sta A2
@@ -123,6 +128,17 @@ main_loop
 
 halt
     jmp halt
+
+; clobbers: a
+clear_input_buffer
+    lda #$80
+clear_buf_loop
+    bit KBD
+    bpl clear_buf_done
+    jsr RDKEY
+    jmp clear_buf_loop
+clear_buf_done
+    jsr
 
 ; inputs: A2 (#$00 or #$20 for Page1 or Page2)
 tile_screen
