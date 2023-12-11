@@ -112,18 +112,21 @@ draw_something
     lda #$00
     sta A2
 
-    lda #<msprite_0
-    sta A1
-    lda #>msprite_0
-    sta A1+1
-    jsr draw_tile
+    ; TODO: generate sprite data from a script, and copy it in
+    ; Then write a small snippet of asm code to copy mega_sprite_data into mega_sprite
 
-    inx
-    lda #<msprite_1
-    sta A1
-    lda #>msprite_1
-    sta A1+1
-    jsr draw_tile
+    ; lda #<msprite_0
+    ; sta A1
+    ; lda #>msprite_0
+    ; sta A1+1
+    ; jsr draw_tile
+
+    ; inx
+    ; lda #<msprite_1
+    ; sta A1
+    ; lda #>msprite_1
+    ; sta A1+1
+    ; jsr draw_tile
 
     rts
 
@@ -293,56 +296,6 @@ bottom_right
     dfb %0_0111010
     dfb %0_0111111
     dfb %0_0000000
-
-; Easier to transform into a mega-sprite.
-; Bits are written in reverse order, as in sprite_quadrants.
-sprite_rows
-    dfb %0_1111110,%0_0111111
-    dfb %0_0000010,%0_0100000
-    dfb %0_1111010,%0_0101111
-    dfb %0_1010010,%0_0101110
-    dfb %0_1111010,%0_0101111
-    dfb %0_1001010,%0_0101100
-    dfb %0_1111010,%0_0101111
-    dfb %0_1111010,%0_0101111
-    dfb %0_0000010,%0_0100000
-    dfb %0_1111110,%0_0111111
-    dfb %0_1100000,%0_0000011
-    dfb %0_1111100,%0_0011111
-    dfb %0_0101110,%0_0110101
-    dfb %0_1010110,%0_0111010
-    dfb %0_1111110,%0_0111111
-    dfb %0_0000000,%0_0000000
-
-; TODO
-;mega_sprite
-msprite_0
-    dfb %0_1111100
-    dfb %0_1111100
-    dfb %0_0001100
-    dfb %0_0001100
-    dfb %0_1001100
-    dfb %0_1001100
-    dfb %0_0001100
-    dfb %0_0001100
-    brk
-    brk
-    brk
-    brk
-    brk
-    brk
-    brk
-    brk
-msprite_1
-    dfb %0_1111111
-    dfb %0_1111111
-    dfb %0_0000000
-    dfb %0_0000000
-    dfb %0_1111111
-    dfb %0_1111111
-    dfb %0_1100110
-    dfb %0_1100110
-    ; ...etc...
 
     brk
     brk
