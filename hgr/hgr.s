@@ -98,154 +98,33 @@ main
     bit HIRES_ON
     bit MIXED_OFF
     bit TEXT_OFF
+
     jsr draw_something
-
-    ; lda #$0b
-
-    ; jsr IOSAVE
-    ; jsr IOREST
-    ; jsr PRBYTE
-    ; jsr IOREST
-
-    ; jsr double_bits
-    ; lda A4
-
-    ; jsr IOSAVE
-    ; jsr IOREST
-    ; jsr PRBYTE
-    ; jsr IOREST
 
 halt
     jmp halt
 
 ; todo
 draw_something
-    ; ldy #$00
-    ; ldx #$00
-
-    ; lda #$00
-    ; sta A2
-
-    ; lda #<msprite_0
-    ; sta A1
-    ; lda #>msprite_0
-    ; sta A1+1
-    ; jsr draw_tile
-
-    ; inx
-    ; lda #<msprite_1
-    ; sta A1
-    ; lda #>msprite_1
-    ; sta A1+1
-    ; jsr draw_tile
-
-    jsr gen_ms
-    brk
-
     ldy #$00
     ldx #$00
 
     lda #$00
     sta A2
 
-    lda #>mega_sprite
-    sta A1+1
-
-    lda #$00
+    lda #<msprite_0
     sta A1
-    jsr draw_tile
-
-    inx
-    lda #$10
-    sta A1
-    jsr draw_tile
-
-    rts
-
-; Generate the mega_sprite. (todo: describe layout)
-;
-; input: sprite
-; output: mega_sprite
-; clobbers: a, x, y
-gen_ms
-    lda #$00
-    ldy #$00
-zero_mega_sprite
-    sta (mega_sprite),y
-    dey
-    bne zero_mega_sprite
-
-    ; copy sprite_rows into $60..$80
-    ldy #$20
-copy_sprite_rows
-    lda (sprite_rows),y
-    sta $60,y
-    dey
-    bne copy_sprite_rows
-
-    ; So far we're only generating two tiles of the mega-sprite...
-
-    ldx #$00 ; input index
-    ldy #$00 ; output index
-gen_loop
-    lda $60,x
-    jsr double_bits
-    and #$7f
-    sta (mega_sprite),y
-    sta (mega_sprite+1),y
-
-    lda $60,x
-    lsr ; shift out *3* bits
-    lsr
-    lsr
-    jsr double_bits
-    lsr
-    sta (mega_sprite+$10),y
-    sta (mega_sprite+$10+1),y
-
-    iny
-    iny
-
-    inx
-    cpx $04
-    bne gen_loop
-
-    rts
-
-; inputs: x in 0..=38, y in 0..=22 (decimal)
-;   A2 (#$00 or #$20 for Page1 or Page2)
-; clobbers nothing
-draw_sprite
-    ; Draw the quadrants in clockwise order.
-
-    lda #<top_left
-    sta A1
-    lda #>top_left
+    lda #>msprite_0
     sta A1+1
     jsr draw_tile
 
     inx
-    lda #<top_right
+    lda #<msprite_1
     sta A1
-    lda #>top_right
+    lda #>msprite_1
     sta A1+1
     jsr draw_tile
 
-    iny
-    lda #<bottom_right
-    sta A1
-    lda #>bottom_right
-    sta A1+1
-    jsr draw_tile
-
-    dex
-    lda #<bottom_left
-    sta A1
-    lda #>bottom_left
-    sta A1+1
-    jsr draw_tile
-
-    dey
     rts
 
 ; inputs: x in 0..40, y in 0..24
@@ -331,35 +210,6 @@ band_offset_loop_end
     rts
 
 ; clobbers: a
-seed_rng
-    lda #$ab ; Use a fixed seed of $ab.
-    sta rng_state
-    rts
-
-; Seed the RNG with zero, after which it will keep emitting zeros.
-; clobbers: a
-disable_rng
-    lda #$00
-    sta rng_state
-    rts
-
-; naive xorshift rng, from:
-; https://codebase64.org/doku.php?id=base:small_fast_8-bit_prng
-;
-; Note: if the seed is zero, it will only generate more zeros.
-; 
-; inputs: rng_state
-; outputs: a
-rng_next
-    lda rng_state
-    asl
-    bcc no_eor
-    eor #$1d
-no_eor
-    sta rng_state
-    rts
-
-; clobbers: a
 black_screen
     lda #$00
     sta $2000
@@ -397,51 +247,6 @@ fill_screen
     brk
     brk
     brk
-
-; Double the bits in the lower half of a.
-; E.g. 0x0b becomes 0xcf
-;
-; inputs: a
-; outputs: a
-; clobbers: A4
-double_bits
-    jsr IOSAVE ; todo: only need to save x
-    jsr IOREST
-
-    pha
-    lda #$00
-    sta A4
-    pla
-
-    ldx #$04
-double_bits_loop
-    ; eat 1 bit from a
-    clc
-    ror
-    pha
-
-    ; store 2 bits in A4
-    lda A4
-    bcc two_zeros
-two_ones
-    ror
-    sec
-    ror
-    jmp done_two_bits
-two_zeros
-    ror
-    clc
-    ror
-done_two_bits
-    sta A4
-
-    pla
-    dex
-    bne double_bits_loop
-
-    jsr IOREST ; restore x
-    lda A4
-    rts
 
 ZERO
     hex 00
