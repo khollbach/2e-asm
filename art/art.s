@@ -138,7 +138,7 @@ clear_buf_loop
     jsr RDKEY
     jmp clear_buf_loop
 clear_buf_done
-    jsr
+    rts
 
 ; inputs: A2 (#$00 or #$20 for Page1 or Page2)
 tile_screen
