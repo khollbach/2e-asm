@@ -1,4 +1,4 @@
-; Tile the screen with the RC logo, with various artifact colors.
+; High-graphics mode experiments.
 
 ; Built-in (ROM) subroutines
 COUT equ $fded
@@ -46,6 +46,7 @@ HIRES_ON equ $c057
 ; Global variables.
 rng_state equ $fe
 flag_bit equ $ff
+mega_sprite equ $bf00
 
 ; This is a terrible hack.
 ;
@@ -93,96 +94,121 @@ actual_main
     org $6000
 
 main
-    ; Glitched version (written to Page 2).
-    jsr seed_rng
-    lda #$20
-    sta A2
-    jsr tile_screen
-
-    ; Black the screen, so the user can see
-    ; the initial screen paint in real time.
     jsr black_screen
     bit HIRES_ON
     bit MIXED_OFF
     bit TEXT_OFF
+    jsr draw_something
 
-    ; Clear the input buffer, so the user doesn't accidentally
-    ; switch screens before they know what's going on.
-    jsr clear_input_buffer
+    ; lda #$0b
 
-    ; Original version.
-    jsr disable_rng
-    lda #$00
-    sta A2
-    jsr tile_screen
+    ; jsr IOSAVE
+    ; jsr IOREST
+    ; jsr PRBYTE
+    ; jsr IOREST
 
-    ; Switch back and forth on keypress.
-main_loop
-    bit PAGE2_OFF
-    jsr RDKEY
+    ; jsr double_bits
+    ; lda A4
 
-    bit PAGE2_ON
-    jsr RDKEY
-
-    jmp main_loop
+    ; jsr IOSAVE
+    ; jsr IOREST
+    ; jsr PRBYTE
+    ; jsr IOREST
 
 halt
     jmp halt
 
-; clobbers: a
-clear_input_buffer
-    lda #$80
-clear_buf_loop
-    bit KBD
-    bpl clear_buf_done
-    jsr RDKEY
-    jmp clear_buf_loop
-clear_buf_done
-    jsr
+; todo
+draw_something
+    ; ldy #$00
+    ; ldx #$00
 
-; inputs: A2 (#$00 or #$20 for Page1 or Page2)
-tile_screen
-    ; Set initial flag bits.
-    lda #$00
-    sta flag_bit
-    jsr set_sprite_flag_bits
+    ; lda #$00
+    ; sta A2
+
+    ; lda #<msprite_0
+    ; sta A1
+    ; lda #>msprite_0
+    ; sta A1+1
+    ; jsr draw_tile
+
+    ; inx
+    ; lda #<msprite_1
+    ; sta A1
+    ; lda #>msprite_1
+    ; sta A1+1
+    ; jsr draw_tile
+
+    jsr gen_ms
+    brk
 
     ldy #$00
-loop_y
     ldx #$00
 
-    ; Every odd line, draw a half-logo at the start of the line,
-    ; and then shift the x coord over by 1.
-    tya
-    bit #$02
-    beq loop_x
-    jsr set_sprite_flag_bits
-    jsr draw_half_logo
-    jsr set_sprite_flag_bits
-    ldx #$01
+    lda #$00
+    sta A2
 
-loop_x
-    jsr draw_sprite
-    jsr set_sprite_flag_bits
+    lda #>mega_sprite
+    sta A1+1
+
+    lda #$00
+    sta A1
+    jsr draw_tile
 
     inx
+    lda #$10
+    sta A1
+    jsr draw_tile
+
+    rts
+
+; Generate the mega_sprite. (todo: describe layout)
+;
+; input: sprite
+; output: mega_sprite
+; clobbers: a, x, y
+gen_ms
+    lda #$00
+    ldy #$00
+zero_mega_sprite
+    sta (mega_sprite),y
+    dey
+    bne zero_mega_sprite
+
+    ; copy sprite_rows into $60..$80
+    ldy #$20
+copy_sprite_rows
+    lda (sprite_rows),y
+    sta $60,y
+    dey
+    bne copy_sprite_rows
+
+    ; So far we're only generating two tiles of the mega-sprite...
+
+    ldx #$00 ; input index
+    ldy #$00 ; output index
+gen_loop
+    lda $60,x
+    jsr double_bits
+    and #$7f
+    sta (mega_sprite),y
+    sta (mega_sprite+1),y
+
+    lda $60,x
+    lsr ; shift out *3* bits
+    lsr
+    lsr
+    jsr double_bits
+    lsr
+    sta (mega_sprite+$10),y
+    sta (mega_sprite+$10+1),y
+
+    iny
+    iny
+
     inx
-    cpx #$28-1
-    bmi loop_x
-
-    ; On odd lines, draw the other half-logo at the end of the line.
-    tya
-    bit #$02
-    beq inc_y
-    jsr set_sprite_flag_bits
-    jsr draw_other_half_logo
-    jsr set_sprite_flag_bits
-
-inc_y
-    iny
-    iny
-    cpy #$18
-    bmi loop_y
+    cpx $04
+    bne gen_loop
 
     rts
 
@@ -196,70 +222,28 @@ draw_sprite
     sta A1
     lda #>top_left
     sta A1+1
-    jsr draw_quadrant
+    jsr draw_tile
 
     inx
     lda #<top_right
     sta A1
     lda #>top_right
     sta A1+1
-    jsr draw_quadrant
+    jsr draw_tile
 
     iny
     lda #<bottom_right
     sta A1
     lda #>bottom_right
     sta A1+1
-    jsr draw_quadrant
+    jsr draw_tile
 
     dex
     lda #<bottom_left
     sta A1
     lda #>bottom_left
     sta A1+1
-    jsr draw_quadrant
-
-    dey
-    rts
-
-; inputs: y in 0..=22 (decimal)
-;   A2 (#$00 or #$20 for Page1 or Page2)
-; clobbers: x
-draw_half_logo
-    ldx #$00
-    lda #<top_right
-    sta A1
-    lda #>top_right
-    sta A1+1
-    jsr draw_quadrant
-
-    iny
-    lda #<bottom_right
-    sta A1
-    lda #>bottom_right
-    sta A1+1
-    jsr draw_quadrant
-
-    dey
-    rts
-
-; inputs: y in 0..=22 (decimal)
-;   A2 (#$00 or #$20 for Page1 or Page2)
-; clobbers: x
-draw_other_half_logo
-    ldx #$28-1
-    lda #<top_left
-    sta A1
-    lda #>top_left
-    sta A1+1
-    jsr draw_quadrant
-
-    iny
-    lda #<bottom_left
-    sta A1
-    lda #>bottom_left
-    sta A1+1
-    jsr draw_quadrant
+    jsr draw_tile
 
     dey
     rts
@@ -267,8 +251,8 @@ draw_other_half_logo
 ; inputs: x in 0..40, y in 0..24
 ;   A1 pointing to sprite data
 ;   A2 (#$00 or #$20 for Page1 or Page2)
-; clobbers nothing
-draw_quadrant
+; clobbers: A4
+draw_tile
     tya
     pha
 
@@ -279,6 +263,7 @@ draw_pixel_rows
     lda (A1),y
     sta (A4)
 
+    clc
     lda A4+1
     adc #$04
     sta A4+1
@@ -291,7 +276,7 @@ draw_pixel_rows
     tay
     rts
 
-; inputs: x, y
+; inputs: x in 0..40, y in 0..24
 ;   A2 (#$00 or #$20 for Page1 or Page2)
 ; clobbers: a
 ; output: A4
@@ -343,56 +328,6 @@ band_offset_loop_end
     adc A2 ; Optionally +$2000 for Page 2.
     sta A4+1
 
-    rts
-
-; Set the sprite flag bits according to the value in flag_bit.
-;
-; But if the RNG was *seeded* (with a non-zero value), then
-; instead scramble the sprite's flag bits.
-;
-; inputs: flag_bit (should be either $00 or $80); rng state
-; clobbers: $60,61
-; outputs: toggles flag_bit if RNG is disabled
-set_sprite_flag_bits
-    jsr IOSAVE
-
-    lda #<sprite
-    sta $60
-    lda #>sprite
-    sta $61
-
-    ldy #$00
-    ldx #$20
-ssfb_loop
-    ; Flip a coin if the RNG was seeded; else do nothing.
-    jsr rng_next
-    and #$80
-    eor flag_bit
-    sta flag_bit
-
-    ; Set flag bit.
-    lda ($60),y
-    and #$7f
-    ora flag_bit
-    sta ($60),y
-
-    clc
-    lda #$01
-    adc $60
-    sta $60
-    lda #$00
-    adc $61
-    sta $61
-
-    dex
-    bne ssfb_loop
-
-    ; Toggle.
-    lda flag_bit
-    eor #$80
-    sta flag_bit
-
-    jsr IOREST
     rts
 
 ; clobbers: a
@@ -463,6 +398,51 @@ fill_screen
     brk
     brk
 
+; Double the bits in the lower half of a.
+; E.g. 0x0b becomes 0xcf
+;
+; inputs: a
+; outputs: a
+; clobbers: A4
+double_bits
+    jsr IOSAVE ; todo: only need to save x
+    jsr IOREST
+
+    pha
+    lda #$00
+    sta A4
+    pla
+
+    ldx #$04
+double_bits_loop
+    ; eat 1 bit from a
+    clc
+    ror
+    pha
+
+    ; store 2 bits in A4
+    lda A4
+    bcc two_zeros
+two_ones
+    ror
+    sec
+    ror
+    jmp done_two_bits
+two_zeros
+    ror
+    clc
+    ror
+done_two_bits
+    sta A4
+
+    pla
+    dex
+    bne double_bits_loop
+
+    jsr IOREST ; restore x
+    lda A4
+    rts
+
 ZERO
     hex 00
 FF
@@ -471,7 +451,7 @@ FF
 ; Note that the bits are "reversed" in the sprite data. This is because the
 ; constant values are written down in msb-first order, but the Apple II display
 ; memory mapping uses lsb-first order.
-sprite
+sprite_quadrants
 top_left
     dfb %0_1111110
     dfb %0_0000010
@@ -481,7 +461,6 @@ top_left
     dfb %0_1001010
     dfb %0_1111010
     dfb %0_1111010
-
 top_right
     dfb %0_0111111
     dfb %0_0100000
@@ -491,7 +470,6 @@ top_right
     dfb %0_0101100
     dfb %0_0101111
     dfb %0_0101111
-
 bottom_left
     dfb %0_0000010
     dfb %0_1111110
@@ -501,7 +479,6 @@ bottom_left
     dfb %0_1010110
     dfb %0_1111110
     dfb %0_0000000
-
 bottom_right
     dfb %0_0100000
     dfb %0_0111111
@@ -511,6 +488,56 @@ bottom_right
     dfb %0_0111010
     dfb %0_0111111
     dfb %0_0000000
+
+; Easier to transform into a mega-sprite.
+; Bits are written in reverse order, as in sprite_quadrants.
+sprite_rows
+    dfb %0_1111110,%0_0111111
+    dfb %0_0000010,%0_0100000
+    dfb %0_1111010,%0_0101111
+    dfb %0_1010010,%0_0101110
+    dfb %0_1111010,%0_0101111
+    dfb %0_1001010,%0_0101100
+    dfb %0_1111010,%0_0101111
+    dfb %0_1111010,%0_0101111
+    dfb %0_0000010,%0_0100000
+    dfb %0_1111110,%0_0111111
+    dfb %0_1100000,%0_0000011
+    dfb %0_1111100,%0_0011111
+    dfb %0_0101110,%0_0110101
+    dfb %0_1010110,%0_0111010
+    dfb %0_1111110,%0_0111111
+    dfb %0_0000000,%0_0000000
+
+; TODO
+;mega_sprite
+msprite_0
+    dfb %0_1111100
+    dfb %0_1111100
+    dfb %0_0001100
+    dfb %0_0001100
+    dfb %0_1001100
+    dfb %0_1001100
+    dfb %0_0001100
+    dfb %0_0001100
+    brk
+    brk
+    brk
+    brk
+    brk
+    brk
+    brk
+    brk
+msprite_1
+    dfb %0_1111111
+    dfb %0_1111111
+    dfb %0_0000000
+    dfb %0_0000000
+    dfb %0_1111111
+    dfb %0_1111111
+    dfb %0_1100110
+    dfb %0_1100110
+    ; ...etc...
 
     brk
     brk
