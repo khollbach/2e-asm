@@ -33,5 +33,17 @@ Program ideas:
 [x] play with artifact colors, and flag bits
 [ ] colors
 
+Demo ideas:
+* We could use the 4-colors painting trick in the scene transitions
+(And Maybe there’s an analogous trick for dhgr ?)
+NOTE: we should be able to interleave pairing one screen with buffering the next one, for instant switching afterwords (and a juicier painting anim.) win-win!
+
 * DHGR
 
+future project ideas:
+* bell
+- life, with blocks (could do this in low-res, and see how fast … but maybe there’s other stuff I wanna do)
+- Life w blocks in hi res
+- Life w dots (how fast can you make it ??) could be some cool bit twiddling thing, idk
+- Life w RC logo
+* something with always-listening audio xfer

@@ -44,8 +44,6 @@ HIRES_OFF equ $c056
 HIRES_ON equ $c057
 
 ; Global variables.
-rng_state equ $fe
-flag_bit equ $ff
 mega_sprite equ $bf00
 
 ; This is a terrible hack.
@@ -104,29 +102,45 @@ main
 halt
     jmp halt
 
-; todo
 draw_something
-    ldy #$00
-    ldx #$00
+    ; TODO: generate sprite data from a script, and copy it in
+    ; Then write a small snippet of asm code to copy mega_sprite_data into mega_sprite
 
     lda #$00
     sta A2
 
-    ; TODO: generate sprite data from a script, and copy it in
-    ; Then write a small snippet of asm code to copy mega_sprite_data into mega_sprite
+    ldy #$00
+    ldx #$00
 
-    ; lda #<msprite_0
-    ; sta A1
-    ; lda #>msprite_0
-    ; sta A1+1
-    ; jsr draw_tile
+    lda #<top_left
+    sta A1
+    lda #>top_left
+    sta A1+1
+    jsr draw_tile
 
-    ; inx
-    ; lda #<msprite_1
-    ; sta A1
-    ; lda #>msprite_1
-    ; sta A1+1
-    ; jsr draw_tile
+    inx
+
+    lda #<top_right
+    sta A1
+    lda #>top_right
+    sta A1+1
+    jsr draw_tile
+
+    iny
+
+    lda #<bottom_right
+    sta A1
+    lda #>bottom_right
+    sta A1+1
+    jsr draw_tile
+
+    dex
+
+    lda #<bottom_left
+    sta A1
+    lda #>bottom_left
+    sta A1+1
+    jsr draw_tile
 
     rts
 
@@ -250,11 +264,6 @@ fill_screen
     brk
     brk
     brk
-
-ZERO
-    hex 00
-FF
-    hex ff
 
 ; Note that the bits are "reversed" in the sprite data. This is because the
 ; constant values are written down in msb-first order, but the Apple II display
